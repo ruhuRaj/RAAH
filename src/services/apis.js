@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://localhost:4000/api'
+export const BASE_URL = process.env.REACT_APP_BASE_URL
 
 // AUTH ENDPOINTS
 export const AUTH_ENDPOINTS = {
