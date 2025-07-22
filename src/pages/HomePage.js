@@ -5,6 +5,7 @@ import {Link} from 'react-router-dom';
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import GrievanceCard from '../components/GrievanceCard';
+import LatestGrievanceCard from '../components/LatestGrievanceCard';
 import img1 from '../assets/Screenshot_2025-07-18_205109-removebg-preview.png';
 import img2 from '../assets/Screenshot_2025-07-18_205341-removebg-preview.png';
 import img3 from '../assets/Screenshot_2025-07-18_205657-removebg-preview.png';
@@ -199,7 +200,7 @@ const HomePage = ({setShowLoginModal}) => {
                         >
                             <div className="infinite-scroll-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
                                 {displayedGrievances.map((grievance, index) => (
-                                    <GrievanceCard key={`${grievance._id}-${index}`} grievance={grievance} />
+                                    <LatestGrievanceCard key={`${grievance._id}-${index}`} grievance={grievance} />
                                 ))}
                             </div>
                         </InfiniteScroll>
