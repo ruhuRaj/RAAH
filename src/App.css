@@ -1,0 +1,249 @@
+/* write your css here */
+/* Define the slideInUp animation (for single entrance animation, if still used elsewhere) */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply the animation class (for single entrance animation) */
+.animate-slide-in-up {
+  animation: slideInUp 0.7s ease-out forwards;
+  opacity: 0;
+}
+
+/* --- Infinite Scroll Animation --- */
+@keyframes infiniteScrollUp {
+  from {
+    transform: translateY(0%); /* Start at the top of the content */
+  }
+  to {
+    transform: translateY(-50%); /* Move up by half the total content height (one full set of original items) */
+  }
+}
+
+.infinite-scroll-container {
+  height: 600px; /* Adjust this height as needed to show desired number of cards */
+  overflow: hidden;
+  position: relative;
+  /* width: 500px; */
+  /* Add some padding or margin if needed */
+}
+
+.infinite-scroll-content {
+  display: flex;
+  flex-direction: column;
+  /* The animation duration should be adjusted based on the number of items
+     and their average height to control scroll speed.
+     For 3 items, 15s might be a good starting point.
+     If you have many items, reduce the percentage in keyframes or increase duration.
+  */
+  animation: infiniteScrollUp 15s linear infinite; /* Linear for constant speed, infinite for looping */
+}
+
+.infinite-scroll-content:hover {
+  animation-play-state: paused; /* Pause animation on hover */
+}
+
+/* Optional: Add a subtle gradient overlay to fade cards in/out at edges */
+.infinite-scroll-container::before,
+.infinite-scroll-container::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50px; /* Height of the fade effect */
+  z-index: 10; /* Ensure it's above the content */
+  pointer-events: none; /* Allow clicks to pass through */
+}
+
+.infinite-scroll-container::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,1), rgba(255,255,255,0));
+}
+
+.infinite-scroll-container::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,0));
+}
+
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.8s ease-out forwards;
+  opacity: 0; /* Start invisible */
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards;
+  opacity: 0; /* Start invisible */
+}
+
+/* Delay utilities (if not already configured in Tailwind) */
+/* Tailwind's JIT mode usually generates these automatically if you use delay-XXX classes */
+/* If not, you might need to add them manually or configure your tailwind.config.js */
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; }
+.delay-700 { animation-delay: 0.7s; }
+.delay-800 { animation-delay: 0.8s; }
+.delay-900 { animation-delay: 0.9s; }
+.delay-1000 { animation-delay: 1.0s; }
+.delay-1100 { animation-delay: 1.1s; }
+.delay-1200 { animation-delay: 1.2s; }
+
+@keyframes border-light {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+.animated-border {
+  position: relative;
+  z-index: 0;
+}
+.animated-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: 0.5rem; /* match button's rounded-md */
+  padding: 2px;
+  background: linear-gradient(120deg, #fff 0%, #60a5fa 50%, #fff 100%);
+  background-size: 200% 200%;
+  animation: border-light 2s linear infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.animated-border:hover {
+  box-shadow: 0 4px 24px 0 rgba(96, 165, 250, 0.18);
+  transform: scale(1.04);
+}
+.animated-border .glow-btn {
+  background: #1d4ed8; /* blue-700 */
+  color: #fff;
+  border: none;
+  border-radius: 0.65rem; /* slightly less than parent for perfect fit */
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 1px 4px 0 rgba(30, 64, 175, 0.10);
+  transition: background 0.3s, color 0.3s;
+  cursor: pointer;
+  outline: none;
+}
+.animated-border .glow-btn:focus {
+  background: #2563eb; /* blue-600 */
+}
+
+/* FAQ Glassmorphism Card */
+.faq-glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  transition: box-shadow 0.3s, border 0.3s;
+}
+.faq-glass.open {
+  box-shadow: 0 12px 40px 0 rgba(99, 102, 241, 0.25), 0 1.5px 8px 0 rgba(99, 102, 241, 0.10);
+  border: 1.5px solid #6366f1;
+  animation: faq-shadow-pulse 0.5s;
+}
+@keyframes faq-shadow-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(99,102,241,0.25); }
+  70% { box-shadow: 0 0 16px 8px rgba(99,102,241,0.15); }
+  100% { box-shadow: 0 12px 40px 0 rgba(99,102,241,0.25); }
+}
+.faq-gradient-text {
+  background: linear-gradient(90deg, #6366f1 0%, #a21caf 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px #a21caf33);
+  transition: filter 0.3s;
+}
+.faq-chevron {
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.faq-chevron.open {
+  transform: rotate(-180deg) scale(1.2);
+}
+.faq-answer {
+  transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1), opacity 0.5s, padding 0.5s, margin 0.5s;
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  margin-top: 0;
+}
+.faq-answer.open {
+  opacity: 1;
+  max-height: 200px;
+  /* padding-top: 0px; */
+  margin-top: 0.1rem;
+  animation: faq-fade-slide 0.5s;
+}
+@keyframes faq-fade-slide {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.faq-bg-animated {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* background: radial-gradient(circle at 80% 20%, #a5b4fc55 0%, transparent 60%),
+              radial-gradient(circle at 20% 80%, #f0abfc44 0%, transparent 60%); */
+  animation: faq-bg-move 8s linear infinite alternate;
+}
+@keyframes faq-bg-move {
+  0% { background-position: 80% 20%, 20% 80%; }
+  100% { background-position: 60% 40%, 40% 60%; }
+}
+
+@keyframes slider-infinite {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.slider-track {
+  display: flex;
+  width: max-content;
+}
