@@ -198,7 +198,7 @@ const HomePage = ({setShowLoginModal}) => {
                             loader={<p className="text-center text-gray-500">Loading more grievances...</p>}
                             endMessage={<p className="text-center text-gray-400">No more grievances to show.</p>}
                         >
-                            <div className="infinite-scroll-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                            <div className="infinite-scroll-content grid grid-cols-1 gap-6 items-stretch">
                                 {displayedGrievances.map((grievance, index) => (
                                     <LatestGrievanceCard key={`${grievance._id}-${index}`} grievance={grievance} />
                                 ))}
