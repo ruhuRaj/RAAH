@@ -64,6 +64,10 @@ app.get('/test', (req, res) => {
     res.status(200).send('Test route is working!');
 });
 
+app.get('/', (req, res) => {
+  res.send('RAAH Redressal System Backend is running!');
+});
+
 // Error handling middleware
 app.use(errorHandler);
 
