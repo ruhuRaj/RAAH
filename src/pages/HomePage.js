@@ -14,11 +14,12 @@ import img6 from '../assets/Screenshot_2025-07-18_210118-removebg-preview.png';
 import img7 from '../assets/Screenshot_2025-07-18_210234-removebg-preview.png';
 // import img8 from '../assets/Screenshot 2025-07-18 205109.png';
 import InfiniteScroll from 'react-infinite-scroll-component';
+import { fetchGrievances } from '../services/grievanceService';
 
 const HomePage = ({setShowLoginModal}) => {
     const navigate = useNavigate();
 
-    const {latestGrievances, loading, error, grievanceStats} = useSelector((state) => state.grievance);
+    const {latestGrievances, grievanceStats} = useSelector((state) => state.grievance);
     const {user} = useSelector((state) => state.profile);
 
     const isLoggedIn = !!user;
@@ -74,21 +75,35 @@ const HomePage = ({setShowLoginModal}) => {
     const [page, setPage] = React.useState(1);
     const [hasMore, setHasMore] = React.useState(true);
     const [displayedGrievances, setDisplayedGrievances] = React.useState([]);
+    const [loading, setLoading] = React.useState(false);
+    const [error, setError] = React.useState(null);
+    const LIMIT = 10;
 
     React.useEffect(() => {
-        if (latestGrievances.length > 0) {
-            setDisplayedGrievances(latestGrievances.slice(0, 5));
-            setPage(1);
-            setHasMore(latestGrievances.length > 5);
-        }
-    }, [latestGrievances]);
+        // On mount, fetch the first page
+        setDisplayedGrievances([]);
+        setPage(1);
+        setHasMore(true);
+        fetchMoreGrievances(true);
+    }, []);
 
-    const fetchMoreGrievances = () => {
-        const nextPage = page + 1;
-        const nextGrievances = latestGrievances.slice(0, nextPage * 5);
-        setDisplayedGrievances(nextGrievances);
-        setPage(nextPage);
-        setHasMore(nextGrievances.length < latestGrievances.length);
+    const fetchMoreGrievances = async (isFirst = false) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const nextPage = isFirst ? 1 : page + 1;
+            const params = { page: nextPage, limit: LIMIT };
+            const response = await fetchGrievances(null, params);
+            const newGrievances = response.grievances || [];
+            setDisplayedGrievances(prev => isFirst ? newGrievances : [...prev, ...newGrievances]);
+            setPage(nextPage);
+            setHasMore(newGrievances.length === LIMIT);
+        } catch (err) {
+            setError(err.message || 'Failed to load grievances.');
+            setHasMore(false);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -177,7 +192,7 @@ const HomePage = ({setShowLoginModal}) => {
                     <div className="infinite-scroll-container bg-gray-50 rounded-lg shadow-inner p-4">
                         <InfiniteScroll
                             dataLength={displayedGrievances.length}
-                            next={fetchMoreGrievances}
+                            next={() => fetchMoreGrievances(false)}
                             hasMore={hasMore}
                             loader={<p className="text-center text-gray-500">Loading more grievances...</p>}
                             endMessage={<p className="text-center text-gray-400">No more grievances to show.</p>}
