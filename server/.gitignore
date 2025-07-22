@@ -4,6 +4,8 @@ node_modules/
 # Environment variables
 .env
 
+seeder.js
+
 # Logs
 npm-debug.log*
 yarn-debug.log*
