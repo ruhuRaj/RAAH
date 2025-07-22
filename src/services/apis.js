@@ -1,4 +1,4 @@
-export const BASE_URL = process.env.REACT_APP_BASE_URL
+export const BASE_URL = 'https://raah-qsuq.onrender.com/api'
 
 // AUTH ENDPOINTS
 export const AUTH_ENDPOINTS = {
