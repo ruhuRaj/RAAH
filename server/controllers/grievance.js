@@ -7,7 +7,7 @@ const { cloudinary } = require('../config/cloudinary');
 const sendEmail = require('../utils/mailSender');
 const fs = require('fs');
 
-// CREATE GRIEVANCE 
+// ------------------------ CREATE GRIEVANCE ------------------------
 const createGrievance = asyncHandler(async (req, res) => {
   const { title, description, category, subCategory, department, addressText, severity } = req.body;
 
@@ -43,7 +43,6 @@ const createGrievance = asyncHandler(async (req, res) => {
     subCategory,
     department,
     severity,
-    priority: severity,
     location: {
       type: "Point",
       addressText: addressText || "",
@@ -65,62 +64,68 @@ const createGrievance = asyncHandler(async (req, res) => {
   res.status(201).json(grievance);
 });
 
-// GET ALL GRIEVANCES 
+// ------------------------ GET ALL GRIEVANCES ------------------------
 const getGrievances = asyncHandler(async (req, res) => {
-  const { status, category, department, assignedTo, search, page = 1, limit = 100 } = req.query;
-  const skip = (page - 1) * limit;
+  try {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 100;
+    const { status, category, department, assignedTo, search } = req.query;
+    const skip = (page - 1) * limit;
 
-  let query = {};
-  if (req.user) {
-    const { accountType, id } = req.user;
-    if (accountType === 'Citizen') query.user = id;
-    else if (accountType === 'Nodal Officers') {
-      query.department = req.user.department;
-      query.assignedTo = { $ne: null }; // Only show grievances that have been assigned
+    let query = {};
+    if (req.user) {
+      const { accountType, id } = req.user;
+      if (accountType === 'Citizen') query.user = id;
+      else if (accountType === 'Nodal Officers') {
+        query.department = req.user.department;
+        query.assignedTo = { $ne: null }; // Only show grievances that have been assigned
+      }
     }
-  }
 
-  if (status) query.status = status;
-  if (category) query.category = category;
-  if (department) query.department = department;
-  
-  // Handle assignedTo parameter
-  if (assignedTo) {
-    if (assignedTo === 'true') {
-      // Get all assigned grievances (assignedTo is not null)
-      query.assignedTo = { $ne: null };
-    } else if (assignedTo === 'false') {
-      // Get all unassigned grievances (assignedTo is null)
-      query.assignedTo = null;
-    } else {
-      // Get grievances assigned to specific user (ObjectId)
-      query.assignedTo = assignedTo;
+    if (status) query.status = status;
+    if (category) query.category = category;
+    if (department) query.department = department;
+    
+    // Handle assignedTo parameter
+    if (assignedTo) {
+      if (assignedTo === 'true') {
+        // Get all assigned grievances (assignedTo is not null)
+        query.assignedTo = { $ne: null };
+      } else if (assignedTo === 'false') {
+        // Get all unassigned grievances (assignedTo is null)
+        query.assignedTo = null;
+      } else {
+        // Get grievances assigned to specific user (ObjectId)
+        query.assignedTo = assignedTo;
+      }
     }
+    
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const count = await Grievance.countDocuments(query);
+    const grievances = await Grievance.find(query)
+    .populate('user', 'firstName lastName email image')
+    .populate('department', 'name')
+    .populate('assignedTo', 'firstName lastName email image')
+    .populate('assignedBy', 'firstName lastName email _id')
+    .populate('comments.user', 'firstName lastName accountType image')
+    .limit(limit)
+    .skip(skip)
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({ grievances, page, pages: Math.ceil(count / limit), total: count });
+  } catch (err) {
+    console.error("Error in getGrievances:", err);
+    res.status(500).json({ message: err.message });
   }
-  
-  if (search) {
-    query.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-    ];
-  }
-
-  const count = await Grievance.countDocuments(query);
-  const grievances = await Grievance.find(query)
-  .populate('user', 'firstName lastName email image')
-  .populate('department', 'name')
-  .populate('assignedTo', 'firstName lastName email image')
-  .populate('assignedBy', 'firstName lastName email _id') // ADD THIS LINE
-  .populate('comments.user', 'firstName lastName accountType image')
-  .limit(limit)
-  .skip(skip)
-  .sort({ createdAt: -1 });
-
-
-  res.status(200).json({ grievances, page, pages: Math.ceil(count / limit), total: count });
 });
 
-// GET BY ID 
+// ------------------------ GET BY ID ------------------------
 const getGrievanceById = asyncHandler(async (req, res) => {
   try {
     console.log("Fetching grievance for ID:", req.params.id);
@@ -142,13 +147,13 @@ const getGrievanceById = asyncHandler(async (req, res) => {
 
     res.status(200).json(grievance);
   } catch (error) {
-    console.error("Error in getGrievanceById:", error.message);
+    console.error("❌ Error in getGrievanceById:", error.message);
     res.status(500).json({ message: error.message });
   }
 });
 
 
-// UPDATE GRIEVANCE (Enhanced) 
+// ------------------------ UPDATE GRIEVANCE (Enhanced) ------------------------
 const updateGrievance = asyncHandler(async (req, res) => {
   const { status, assignedTo, resolutionDetails, rejectedReason, feedbackRating, feedbackComment, note } = req.body;
   const grievance = await Grievance.findById(req.params.id);
@@ -287,7 +292,7 @@ const updateGrievance = asyncHandler(async (req, res) => {
   res.status(200).json(updated);
 });
 
-// ADD COMMENT 
+// ------------------------ ADD COMMENT ------------------------
 const addGrievanceComment = asyncHandler(async (req, res) => {
   const { text, isPublic } = req.body;
   const grievance = await Grievance.findById(req.params.id);
@@ -304,7 +309,7 @@ const addGrievanceComment = asyncHandler(async (req, res) => {
   res.status(201).json(updated.comments.at(-1));
 });
 
-// ASSIGN GRIEVANCE (Enhanced) 
+// ------------------------ ASSIGN GRIEVANCE (Enhanced) ------------------------
 // Assign grievance to department (DM Action)
 const assignGrievance = asyncHandler(async (req, res) => {
   const grievanceId = req.params.id;
@@ -419,7 +424,7 @@ const assignGrievance = asyncHandler(async (req, res) => {
 
 
 
-// GET GRIEVANCE STATISTICS
+// ------------------------ GET GRIEVANCE STATISTICS ------------------------
 const getGrievanceStats = asyncHandler(async (req, res) => {
   const { userId, accountType, department } = req.user;
 
@@ -483,7 +488,7 @@ const getGrievanceStats = asyncHandler(async (req, res) => {
   res.status(200).json(formattedStats);
 });
 
-// GET UNASSIGNED GRIEVANCES (DM Only) 
+// ------------------------ GET UNASSIGNED GRIEVANCES (DM Only) ------------------------
 const getUnassignedGrievances = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10 } = req.query;
   const skip = (page - 1) * limit;
@@ -509,7 +514,7 @@ const getUnassignedGrievances = asyncHandler(async (req, res) => {
   });
 });
 
-// GET ASSIGNED GRIEVANCES (Nodal Only) 
+// ------------------------ GET ASSIGNED GRIEVANCES (Nodal Only) ------------------------
 const getAssignedGrievances = asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, status } = req.query;
   const skip = (page - 1) * limit;
@@ -605,7 +610,7 @@ const getDashboardStats = asyncHandler(async (req, res) => {
   res.status(200).json(formattedStats);
 });
 
-// DELETE GRIEVANCE (DM Only) 
+// ------------------------ DELETE GRIEVANCE (DM Only) ------------------------
 const deleteGrievance = asyncHandler(async (req, res) => {
   const grievance = await Grievance.findById(req.params.id);
   
