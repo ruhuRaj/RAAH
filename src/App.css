@@ -37,7 +37,7 @@
 
 .infinite-scroll-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse;
   /* The animation duration should be adjusted based on the number of items
      and their average height to control scroll speed.
      For 3 items, 15s might be a good starting point.
