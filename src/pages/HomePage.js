@@ -13,6 +13,7 @@ import img5 from '../assets/Screenshot_2025-07-18_210026-removebg-preview.png';
 import img6 from '../assets/Screenshot_2025-07-18_210118-removebg-preview.png';
 import img7 from '../assets/Screenshot_2025-07-18_210234-removebg-preview.png';
 // import img8 from '../assets/Screenshot 2025-07-18 205109.png';
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 const HomePage = ({setShowLoginModal}) => {
     const navigate = useNavigate();
@@ -70,6 +71,25 @@ const HomePage = ({setShowLoginModal}) => {
     ];
 
     const [openIndex, setOpenIndex] = React.useState(null);
+    const [page, setPage] = React.useState(1);
+    const [hasMore, setHasMore] = React.useState(true);
+    const [displayedGrievances, setDisplayedGrievances] = React.useState([]);
+
+    React.useEffect(() => {
+        if (latestGrievances.length > 0) {
+            setDisplayedGrievances(latestGrievances.slice(0, 5));
+            setPage(1);
+            setHasMore(latestGrievances.length > 5);
+        }
+    }, [latestGrievances]);
+
+    const fetchMoreGrievances = () => {
+        const nextPage = page + 1;
+        const nextGrievances = latestGrievances.slice(0, nextPage * 5);
+        setDisplayedGrievances(nextGrievances);
+        setPage(nextPage);
+        setHasMore(nextGrievances.length < latestGrievances.length);
+    };
 
     return (
         <>
@@ -153,13 +173,21 @@ const HomePage = ({setShowLoginModal}) => {
                     </p>
                 )}
 
-                {grievancesForInfiniteScroll.length > 0 ? (
+                {displayedGrievances.length > 0 ? (
                     <div className="infinite-scroll-container bg-gray-50 rounded-lg shadow-inner p-4">
-                        <div className="infinite-scroll-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch"> {/* Added grid and items-stretch */}
-                            {grievancesForInfiniteScroll.map((grievance, index) => (
-                                <GrievanceCard key={`${grievance._id}-${index}`} grievance={grievance} />
-                            ))}
-                        </div>
+                        <InfiniteScroll
+                            dataLength={displayedGrievances.length}
+                            next={fetchMoreGrievances}
+                            hasMore={hasMore}
+                            loader={<p className="text-center text-gray-500">Loading more grievances...</p>}
+                            endMessage={<p className="text-center text-gray-400">No more grievances to show.</p>}
+                        >
+                            <div className="infinite-scroll-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+                                {displayedGrievances.map((grievance, index) => (
+                                    <GrievanceCard key={`${grievance._id}-${index}`} grievance={grievance} />
+                                ))}
+                            </div>
+                        </InfiniteScroll>
                     </div>
                 ) : (
                     !loading && !error && (
